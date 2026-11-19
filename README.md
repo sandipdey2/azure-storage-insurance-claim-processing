@@ -34,5 +34,3 @@ All required items completed and verified via screenshots:
 - File share name standardized to `repairquotes` (lowercase) to match actual deployment.
 - StorageAdmin / InternalApp role assignments were blocked by tenant directory permissions; system-assigned managed identity role was assigned successfully.
 - All screenshots provided separately for submission.
-
-**Project complete.**
