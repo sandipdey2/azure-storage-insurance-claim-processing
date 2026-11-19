@@ -70,4 +70,4 @@ All required evidence is included in the repository root / screenshots folder.
 - `map-network-drive.ps1` – Map file share as network drive
 
 ---
-**Submission complete.** All rubric items addressed with evidence. Platform limitations (53-day rotation max, portal role-assignment display lag) are documented above.
+All rubric items addressed with evidence. Platform limitations (53-day rotation max, portal role-assignment display lag) are documented above.
