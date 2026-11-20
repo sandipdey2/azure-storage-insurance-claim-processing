@@ -4,15 +4,11 @@
   "parameters": {
     "storageAccountName": {
       "type": "string",
-      "metadata": {
-        "description": "Primary storage account name"
-      }
+      "metadata": { "description": "Primary storage account name" }
     },
     "destinationStorageAccountName": {
       "type": "string",
-      "metadata": {
-        "description": "Destination storage account name for object replication"
-      }
+      "metadata": { "description": "Destination storage account name" }
     },
     "location": {
       "type": "string",
@@ -38,6 +34,9 @@
       "type": "int",
       "defaultValue": 100
     }
+  },
+  "variables": {
+    "policyId": "replication-policy-images"
   },
   "resources": [
     {
@@ -74,34 +73,49 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-01-01",
       "name": "[format('{0}/default/{1}', parameters('storageAccountName'), parameters('containerName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-      ],
-      "properties": {
-        "publicAccess": "None"
-      }
+      "dependsOn": ["[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"],
+      "properties": { "publicAccess": "None" }
     },
     {
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2023-01-01",
       "name": "[format('{0}/default/{1}', parameters('destinationStorageAccountName'), parameters('containerName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('destinationStorageAccountName'))]"
-      ],
-      "properties": {
-        "publicAccess": "None"
-      }
+      "dependsOn": ["[resourceId('Microsoft.Storage/storageAccounts', parameters('destinationStorageAccountName'))]"],
+      "properties": { "publicAccess": "None" }
     },
     {
       "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
       "apiVersion": "2023-01-01",
       "name": "[format('{0}/default/{1}', parameters('storageAccountName'), parameters('fileShareName'))]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-      ],
+      "dependsOn": ["[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"],
       "properties": {
         "shareQuota": "[parameters('fileShareQuota')]",
         "enabledProtocols": "SMB"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/objectReplicationPolicies",
+      "apiVersion": "2023-01-01",
+      "name": "[format('{0}/{1}', parameters('storageAccountName'), variables('policyId'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('destinationStorageAccountName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('storageAccountName'), 'default', parameters('containerName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', parameters('destinationStorageAccountName'), 'default', parameters('containerName'))]"
+      ],
+      "properties": {
+        "sourceAccount": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+        "destinationAccount": "[resourceId('Microsoft.Storage/storageAccounts', parameters('destinationStorageAccountName'))]",
+        "rules": [
+          {
+            "ruleId": "rule-images",
+            "sourceContainer": "[parameters('containerName')]",
+            "destinationContainer": "[parameters('containerName')]",
+            "filters": {
+              "prefixMatch": [""]
+            }
+          }
+        ]
       }
     }
   ],
@@ -113,6 +127,10 @@
     "destinationStorageAccount": {
       "type": "string",
       "value": "[parameters('destinationStorageAccountName')]"
+    },
+    "replicationPolicyId": {
+      "type": "string",
+      "value": "[variables('policyId')]"
     }
   }
 }
